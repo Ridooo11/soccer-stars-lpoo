@@ -40,7 +40,7 @@ public class Menu extends JPanel implements ActionListener {
 
         // Botón de Configuración de Resolución
         gbc.gridy = 2;
-        resolutionButton = new JButton("Resolución");
+        resolutionButton = new JButton("Resolucion");
         resolutionButton.addActionListener(e -> showResolutionOptions());
         add(resolutionButton, gbc);
 
