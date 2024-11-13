@@ -165,12 +165,12 @@ public class Player {
  // Método adicional para agregar efecto intencionalmente
     public void addSpinToBall(Ball ball, double hitAngle) {
         // Calcular el efecto basado en el ángulo de golpe
-        double spinAmount = Math.sin(hitAngle) * 5.0; // 5.0 es la cantidad máxima de efecto
+        double spinAmount = Math.sin(hitAngle) * 3.0; // 5.0 es la cantidad máxima de efecto
         ball.addSpin(spinAmount);
     }
 
     public void checkWallCollision(int width, int height) {
-        double reboundFactor = 0.7; // Reduce la velocidad en cada rebote (entre 0 y 1)
+        double reboundFactor = 0.5; // Reduce la velocidad en cada rebote (entre 0 y 1)
 
         if (x < 0) {
             x = 0;
@@ -201,6 +201,32 @@ public class Player {
         this.velX = 0;
         this.velY = 0;
     }
+    
+    public void handlePostCollision() {
+        // Factor de rebote
+        double reboundFactor = 0.8; // Entre 0 y 1
+
+        // Invertir la dirección de la velocidad y reducirla (aplicar rebote)
+        this.velX = -this.velX * reboundFactor;
+        this.velY = -this.velY * reboundFactor;
+
+        // Ajustar la posición para evitar que el jugador se quede pegado al poste
+        // Esto es opcional, dependiendo de cómo quieres manejar las colisiones (eliminar la "pegajosidad")
+        // Esta es una forma de separarlo después de la colisión
+        if (x < 0) {
+            x = 0;
+        } else if (x + DIAMETER > 800) { // Suponiendo que el ancho de la pantalla es 800
+            x = 800 - DIAMETER;
+        }
+
+        if (y < 0) {
+            y = 0;
+        } else if (y + DIAMETER > 600) { // Suponiendo que la altura de la pantalla es 600
+            y = 600 - DIAMETER;
+        }
+    }
+
+
     
     public void move() {
         // Método para actualizar posición en base a la velocidad (si es necesario)

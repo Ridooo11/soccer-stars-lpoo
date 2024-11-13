@@ -11,7 +11,7 @@ private double x, y;
     private final int DIAMETER = 20;
     private final double FRICTION = 0.99;
     private final double SPIN_DECAY = 0.98; // Decaimiento del efecto
-    private final double SPIN_FACTOR = 0.15; // Qué tanto afecta el efecto a la trayectoria
+    private final double SPIN_FACTOR = 0.08; // Qué tanto afecta el efecto a la trayectoria
 
     public Ball(int x, int y) {
         this.x = x;
@@ -46,8 +46,8 @@ private double x, y;
         velY *= FRICTION;
 
         // Detener cuando la velocidad es muy baja
-        if (Math.abs(velX) < 0.1) velX = 0;
-        if (Math.abs(velY) < 0.1) velY = 0;
+        if (Math.abs(velX) < 1.5) velX = 0;
+        if (Math.abs(velY) < 1.5) velY = 0;
     }
    
     public void addSpin(double spinAmount) {
@@ -101,6 +101,8 @@ private double x, y;
                         (int)(y + DIAMETER/2 - spinIndicatorSize/2),
                         spinIndicatorSize, spinIndicatorSize);
         }
+        
+        
     }
 
     // Método para manejar colisiones con los bordes

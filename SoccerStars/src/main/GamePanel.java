@@ -31,6 +31,7 @@ public class GamePanel extends JPanel implements ActionListener, MouseListener, 
     private Player player1;
     private Player player2;
     private Ball ball;
+    private Goal goal;
     private Goal leftGoal;
     private Goal rightGoal;
     private Timer timer;
@@ -55,7 +56,7 @@ public class GamePanel extends JPanel implements ActionListener, MouseListener, 
         
         // Inicializar pelota y goles
         ball = new Ball(WIDTH / 2, HEADER_HEIGHT + (FIELD_HEIGHT / 2));
-        leftGoal = new Goal(0, HEADER_HEIGHT + (FIELD_HEIGHT/2) - 60, true);
+        leftGoal = new Goal(0, HEADER_HEIGHT + (FIELD_HEIGHT/2) - 100, true);
         rightGoal = new Goal(WIDTH - 20, HEADER_HEIGHT + (FIELD_HEIGHT/2) - 60, false);
         
         timer = new Timer(16, this);
@@ -203,6 +204,8 @@ public class GamePanel extends JPanel implements ActionListener, MouseListener, 
         
         // Dibujar pelota y goles
         ball.draw(g);
+        leftGoal.draw(g);
+        rightGoal.draw(g);
         
      // Dibujar línea de dirección si estamos arrastrando
         if (dragging && selectedPlayer != null && dragStart != null && dragCurrent != null) {
@@ -357,24 +360,37 @@ public class GamePanel extends JPanel implements ActionListener, MouseListener, 
 
     // Modificar el método checkCollisions para incluir todos los jugadores
     private void checkCollisions() {
-        // Colisiones entre jugadores y pelota
-        for(Player player : teamRed) {
-            if(player.collidesWith(ball)) {
+        // Verificar colisiones con los jugadores del equipo rojo
+        for (Player player : teamRed) {
+            if (player.collidesWith(ball)) {
                 player.handleCollision(ball);
+            }
+            if (leftGoal.checkCollisionWithPost(player) || rightGoal.checkCollisionWithPost(player)) {
+                player.handlePostCollision();  // Aplica rebote y reduce velocidad
             }
         }
-        for(Player player : teamBlue) {
-            if(player.collidesWith(ball)) {
+
+        // Verificar colisiones con los jugadores del equipo azul
+        for (Player player : teamBlue) {
+            if (player.collidesWith(ball)) {
                 player.handleCollision(ball);
             }
+            if (leftGoal.checkCollisionWithPost(player) || rightGoal.checkCollisionWithPost(player)) {
+                player.handlePostCollision();  // Aplica rebote y reduce velocidad
+            }
+        }
+
+        // Verificar colisiones del balón con los postes
+        if (leftGoal.checkCollisionWithPost(ball) || rightGoal.checkCollisionWithPost(ball)) {
+            // Aplica rebote y reduce la velocidad del balón
+            handlePostCollision(ball);
         }
         
-        // Colisiones entre jugadores
+        // Verificar colisiones de los jugadores con las paredes (si es necesario)
         checkPlayerCollisions();
-        
-        // Colisiones con paredes
         checkWallCollisions();
     }
+
     
     private void checkPlayerCollisions() {
         // Colisiones dentro del mismo equipo rojo
@@ -636,6 +652,19 @@ public class GamePanel extends JPanel implements ActionListener, MouseListener, 
             repaint();
         }
     }
+    
+    private void handlePostCollision(Ball ball) {
+        // Rebote al chocar con el poste, reduce la velocidad
+        ball.setVelocity(-ball.getVelX() * 0.5, -ball.getVelY() * 0.5);
+    }
+
+    private void handlePostCollision(Player player) {
+        // Rebote para el jugador al chocar con el poste
+        player.setVelocity(-player.getVelX() * 0.5, -player.getVelY() * 0.5);
+    }
+    
+    
+
 
     
 
