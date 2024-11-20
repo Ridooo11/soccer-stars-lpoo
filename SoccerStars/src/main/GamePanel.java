@@ -358,16 +358,14 @@ public class GamePanel extends JPanel implements ActionListener, MouseListener, 
         g2d.drawLine((int)end.getX(), (int)end.getY(), (int)tip2.getX(), (int)tip2.getY());
     }
 
-    // Modificar el método checkCollisions para incluir todos los jugadores
     private void checkCollisions() {
         // Verificar colisiones con los jugadores del equipo rojo
         for (Player player : teamRed) {
             if (player.collidesWith(ball)) {
                 player.handleCollision(ball);
             }
-            if (leftGoal.checkCollisionWithPost(player) || rightGoal.checkCollisionWithPost(player)) {
-                player.handlePostCollision();  // Aplica rebote y reduce velocidad
-            }
+            leftGoal.checkCollisionWithPost(player);
+            rightGoal.checkCollisionWithPost(player);
         }
 
         // Verificar colisiones con los jugadores del equipo azul
@@ -375,21 +373,23 @@ public class GamePanel extends JPanel implements ActionListener, MouseListener, 
             if (player.collidesWith(ball)) {
                 player.handleCollision(ball);
             }
-            if (leftGoal.checkCollisionWithPost(player) || rightGoal.checkCollisionWithPost(player)) {
-                player.handlePostCollision();  // Aplica rebote y reduce velocidad
-            }
+            leftGoal.checkCollisionWithPost(player);
+            rightGoal.checkCollisionWithPost(player);
         }
 
         // Verificar colisiones del balón con los postes
-        if (leftGoal.checkCollisionWithPost(ball) || rightGoal.checkCollisionWithPost(ball)) {
-            // Aplica rebote y reduce la velocidad del balón
-            handlePostCollision(ball);
-        }
-        
-        // Verificar colisiones de los jugadores con las paredes (si es necesario)
+        leftGoal.checkCollisionWithPost(ball);
+        rightGoal.checkCollisionWithPost(ball);
+
+        // Verificar colisiones entre jugadores
         checkPlayerCollisions();
+
+        // Verificar colisiones con las paredes
         checkWallCollisions();
     }
+
+
+
 
     
     private void checkPlayerCollisions() {

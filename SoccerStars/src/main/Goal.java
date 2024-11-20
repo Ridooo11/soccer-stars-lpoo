@@ -8,8 +8,8 @@ public class Goal {
     private int x, y;
     private int width = 20;    
     private int height = 120;  
-    private int POST_WIDTH = 30;
-    private int POST_HEIGHT = 10; 
+    private int POST_WIDTH = 20;
+    private int POST_HEIGHT = 15; 
     private boolean isLeftGoal; 
     private Rectangle leftPost;
     private Rectangle rightPost;
@@ -19,24 +19,43 @@ public class Goal {
         this.x = x;
         this.y = y;
         this.isLeftGoal = isLeftGoal;
-        
-        leftPost = new Rectangle(x, y, width, height);
-        rightPost = new Rectangle(isLeftGoal ? x + 50 : x, y, POST_WIDTH, POST_HEIGHT);
-        crossbar = new Rectangle(isLeftGoal ? x + 10 : x, y, POST_WIDTH, POST_HEIGHT);
+
+        leftPost = new Rectangle(
+                isLeftGoal ? x + 50 : x - 50, 
+                isLeftGoal ? y : y - 40,
+                POST_WIDTH,
+                POST_HEIGHT
+            );
+
+       
+        rightPost = new Rectangle(
+            isLeftGoal ? x + 50 : x - 50, 
+            isLeftGoal ? y + 190 : y + 150,
+            POST_WIDTH,
+            POST_HEIGHT
+        );
+
+       
+        crossbar = new Rectangle(
+            isLeftGoal ? x : x - width,
+            y,
+            POST_WIDTH + POST_WIDTH, 
+            POST_HEIGHT
+        );
     }
+
    
     public void draw(Graphics g) {
-    	g.setColor(Color.WHITE);
-        // Dibujar el poste vertical principal
-        //g.fillRect(x, y, width, height);
-        // Dibujar el travesaño horizontal
-        g.fillRect(isLeftGoal ? x + 50 : x - 30, y, POST_WIDTH, POST_HEIGHT);
-
-        // Dibujar bordes rojos para visualizar las hitboxes
         g.setColor(Color.RED);
-        //g.drawRect(x, y, width, height); 
-        g.drawRect(isLeftGoal ? x + 50 : x - 30, y, POST_WIDTH, POST_HEIGHT); 
+
+        // Dibujar poste izquierdo
+        g.fillRect(leftPost.x, leftPost.y, leftPost.width, leftPost.height);
+        g.fillRect(rightPost.x, rightPost.y, rightPost.width, rightPost.height);
+
+        // Dibujar travesaño
+        //g.fillRect(crossbar.x, crossbar.y, crossbar.width, crossbar.height);
     }
+
    
     
     public boolean checkGoal(Ball ball) {
@@ -56,26 +75,87 @@ public class Goal {
     
     public void checkCollisionWithPost(Ball ball) {
         // Factor de rebote (ajustable)
-        double reboundFactor = 0.8; // Entre 0 y 1, donde 1 es rebote completo y 0 es sin rebote
-        
+        double reboundFactor = 0.7; // Ajusta según la experiencia deseada
+
         // Verificar colisiones con los postes y el travesaño
-        if (leftPost.intersects(ball.getX(), ball.getY(), ball.getDiameter(), ball.getDiameter()) ||
-            rightPost.intersects(ball.getX(), ball.getY(), ball.getDiameter(), ball.getDiameter()) ||
-            crossbar.intersects(ball.getX(), ball.getY(), ball.getDiameter(), ball.getDiameter())) {
-            
-            // Colisión detectada, aplicar rebote
+        boolean leftPostCollision = leftPost.intersects(
+            ball.getX(),
+            ball.getY(),
+            ball.getDiameter(),
+            ball.getDiameter()
+        );
+
+        boolean rightPostCollision = rightPost.intersects(
+            ball.getX(),
+            ball.getY(),
+            ball.getDiameter(),
+            ball.getDiameter()
+        );
+
+        boolean crossbarCollision = crossbar.intersects(
+            ball.getX(),
+            ball.getY(),
+            ball.getDiameter(),
+            ball.getDiameter()
+        );
+
+        if (leftPostCollision || rightPostCollision || crossbarCollision) {
+            // Rebote
             double newVelX = -ball.getVelX() * reboundFactor;
             double newVelY = -ball.getVelY() * reboundFactor;
-
-            // Establecer nuevas velocidades al balón
             ball.setVelocity(newVelX, newVelY);
-            
-            // Opcional: Separar el balón de la colisión si se queda pegado (ajustar su posición)
-            double overlap = (ball.getDiameter() / 2 + POST_WIDTH / 2) - Math.sqrt(Math.pow(ball.getX() - x, 2) + Math.pow(ball.getY() - y, 2));
+
+            // Separación en caso de superposición
+            double overlap = (ball.getDiameter() / 2 + POST_WIDTH / 2) -
+                             Math.sqrt(Math.pow(ball.getX() - x, 2) + Math.pow(ball.getY() - y, 2));
             if (overlap > 0) {
                 ball.setPosition(ball.getX() + newVelX * overlap, ball.getY() + newVelY * overlap);
             }
         }
     }
+
+    
+    public void checkCollisionWithPost(Player player) {
+        // Factor de rebote (ajustable)
+        double reboundFactor = 0.5;
+
+        // Verificar colisiones con los postes y el travesaño
+        boolean leftPostCollision = leftPost.intersects(
+            player.getX(),
+            player.getY(),
+            player.getDiameter(),
+            player.getDiameter()
+        );
+
+        boolean rightPostCollision = rightPost.intersects(
+            player.getX(),
+            player.getY(),
+            player.getDiameter(),
+            player.getDiameter()
+        );
+
+        boolean crossbarCollision = crossbar.intersects(
+            player.getX(),
+            player.getY(),
+            player.getDiameter(),
+            player.getDiameter()
+        );
+
+        if (leftPostCollision || rightPostCollision || crossbarCollision) {
+            // Rebote
+            double newVelX = -player.getVelX() * reboundFactor;
+            double newVelY = -player.getVelY() * reboundFactor;
+            player.setVelocity(newVelX, newVelY);
+
+            // Separación en caso de superposición
+            double overlap = (player.getDiameter() / 2 + POST_WIDTH / 2) -
+                             Math.sqrt(Math.pow(player.getX() - x, 2) + Math.pow(player.getY() - y, 2));
+            if (overlap > 0) {
+                player.setPosition(player.getX() + newVelX * overlap, player.getY() + newVelY * overlap);
+            }
+        }
+    }
+
+
 
 }
