@@ -155,6 +155,33 @@ public class Goal {
             }
         }
     }
+    
+    public void setPosition(int newX, int newY) {
+        this.x = newX;
+        this.y = newY;
+
+        // Actualizar las posiciones de los postes
+        leftPost.setBounds(
+            isLeftGoal ? x + 50 : x - 50,
+            isLeftGoal ? y : y - 40,
+            POST_WIDTH,
+            POST_HEIGHT
+        );
+
+        rightPost.setBounds(
+            isLeftGoal ? x + 50 : x - 50,
+            isLeftGoal ? y + 190 : y + 150,
+            POST_WIDTH,
+            POST_HEIGHT
+        );
+
+        crossbar.setBounds(
+            isLeftGoal ? x : x - width,
+            y,
+            POST_WIDTH + POST_WIDTH,
+            POST_HEIGHT
+        );
+    }
 
 
 

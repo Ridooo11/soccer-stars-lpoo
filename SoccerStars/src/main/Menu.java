@@ -6,9 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public class Menu extends JPanel implements ActionListener {
-    private final int GAME_WIDTH = 1000;
-    private final int GAME_HEIGHT = 600;
-
+    private Dimension currentResolution;
     private JButton playButton;
     private JButton volumeButton;
     private JButton tutorialButton;
@@ -16,7 +14,7 @@ public class Menu extends JPanel implements ActionListener {
     private JSlider volumeSlider;
 
     public Menu() {
-        setPreferredSize(new Dimension(GAME_WIDTH, GAME_HEIGHT));
+        setResolution(new Dimension(1280, 800)); // Resolución inicial
         setLayout(new GridBagLayout());
 
         GridBagConstraints gbc = new GridBagConstraints();
@@ -51,8 +49,13 @@ public class Menu extends JPanel implements ActionListener {
         add(tutorialButton, gbc);
     }
 
+    private void setResolution(Dimension resolution) {
+        currentResolution = resolution;
+        setPreferredSize(currentResolution);
+    }
+
     private void showVolumeOptions() {
-        volumeSlider = new JSlider(0, 100, 50); // Rango de 0 a 100, valor inicial 50
+        volumeSlider = new JSlider(0, 100, 50); 
         volumeSlider.setMajorTickSpacing(10);
         volumeSlider.setPaintTicks(true);
         volumeSlider.setPaintLabels(true);
@@ -65,34 +68,40 @@ public class Menu extends JPanel implements ActionListener {
     }
 
     private void showResolutionOptions() {
-        String[] resolutions = {"800x600", "1024x768", "1280x720", "1600x900", "1920x1080"};
+        String[] resolutions = {"800x600", "1024x768", "1280x800", "1600x900", "1920x1080"};
         String selectedResolution = (String) JOptionPane.showInputDialog(this, "Selecciona la resolución:",
                 "Configuración de Resolución", JOptionPane.PLAIN_MESSAGE, null, resolutions, resolutions[0]);
 
         if (selectedResolution != null) {
             switch (selectedResolution) {
                 case "800x600":
-                    setPreferredSize(new Dimension(800, 600));
+                    setResolution(new Dimension(800, 600));
                     break;
                 case "1024x768":
-                    setPreferredSize(new Dimension(1024, 768));
+                    setResolution(new Dimension(1024, 768));
                     break;
-                case "1280x720":
-                    setPreferredSize(new Dimension(1280, 720));
+                case "1280x800":
+                    setResolution(new Dimension(1280, 800));
                     break;
                 case "1600x900":
-                    setPreferredSize(new Dimension(1600, 900));
+                    setResolution(new Dimension(1600, 900));
                     break;
                 case "1920x1080":
-                    setPreferredSize(new Dimension(1920, 1080));
+                    setResolution(new Dimension(1920, 1080));
                     break;
             }
             JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
             if (topFrame != null) {
                 topFrame.pack();
-                topFrame.setLocationRelativeTo(null); // Centrar la ventana
+                topFrame.setLocationRelativeTo(null); 
             }
+            updatePlayerPositions(); // Actualizar posiciones de jugadores
+            repaint(); // Redibujar el menú
         }
+    }
+
+    private void updatePlayerPositions() {
+        // Aquí puedes implementar la lógica para ajustar las posiciones de los jugadores según la resolución
     }
 
     private void showTutorial() {
@@ -107,10 +116,10 @@ public class Menu extends JPanel implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == playButton) {
-            showTeamSelection(); // Paso 1: Seleccionar equipo
+            showTeamSelection(); 
         }
     }
-
+    
     private void showTeamSelection() {
         String[] teams = {"Equipo A", "Equipo B", "Equipo C", "Equipo D"};
         JComboBox<String> teamSelection1 = new JComboBox<>(teams);
@@ -162,14 +171,17 @@ public class Menu extends JPanel implements ActionListener {
 
     private void startGame() {
         JFrame gameFrame = new JFrame("Soccer Stars");
-        GamePanel gamePanel = new GamePanel();
+        
+        // Pasar la resolución actual al GamePanel
+        GamePanel gamePanel = new GamePanel(currentResolution.width, currentResolution.height);
 
         gameFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        gameFrame.setResizable(false);
         gameFrame.add(gamePanel);
+        
         gameFrame.pack();
         gameFrame.setLocationRelativeTo(null);
         gameFrame.setVisible(true);
+        gameFrame.setResizable(false);
 
         gamePanel.startGame();
 

@@ -10,7 +10,7 @@ public class Player {
 	private int x, y;
     private double velX, velY;
     final int DIAMETER = 40;
-    private final double FRICTION = 0.98;
+    private final double FRICTION = 0.974;
     private final double FORCE_MULTIPLIER = 0.2;
     private final double COLLISION_ELASTICITY = 0.8;
     private Color teamColor; // Nuevo: color del equipo
@@ -81,8 +81,8 @@ public class Player {
             velY *= FRICTION;
 
         // Detener el movimiento cuando la velocidad es muy baja
-        if (Math.abs(velX) < 1) velX = 0;
-        if (Math.abs(velY) < 1) velY = 0;
+        if (Math.abs(velX) < 2) velX = 0;
+        if (Math.abs(velY) < 2) velY = 0;
     }
     
     

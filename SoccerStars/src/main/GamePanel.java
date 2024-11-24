@@ -1,7 +1,13 @@
 
 package main;
 
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.SwingConstants;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.Point2D;
@@ -17,16 +23,16 @@ import java.io.File;
 public class GamePanel extends JPanel implements ActionListener, MouseListener, MouseMotionListener {
 
 	// Modificar dimensiones
-    private final int WIDTH = 1280;          // Aumentamos ancho
-    private final int HEIGHT = 800;          // Aumentamos alto
+    private int WIDTH = 1280;          // Aumentamos ancho
+    private int HEIGHT = 800;          // Aumentamos alto
     private final int HEADER_HEIGHT = 80;    // Espacio para marcador y nombres
-    private final int FIELD_HEIGHT = HEIGHT - HEADER_HEIGHT; // Altura real del campo
+    private final int FIELD_HEIGHT = HEIGHT - HEADER_HEIGHT; // Altura real del camp 
     private boolean dragging = false;
     private Point dragStart;
     private Point dragCurrent;
     private final int MAX_DRAG_LENGTH = 100;
     private boolean isSpinEnabled = false; // Variable para controlar si el efecto está activado
-    private double spinAngle = 0.0;        // Ángulo para el efecto
+    private double spinAngle = 0.0;        
     
     private Player player1;
     private Player player2;
@@ -45,9 +51,20 @@ public class GamePanel extends JPanel implements ActionListener, MouseListener, 
     private boolean isRedTeamTurn = true; // true para equipo rojo, false para equipo azul
     private Player selectedPlayer;
     private BufferedImage backgroundImage;
+    
+    private Timer gameTimer; // Temporizador del juego
+    private int timeRemaining = 300; // Tiempo en segundos (5 minutos)
+    private Timer turnTimer;         // Temporizador para el turno actual
+    private int turnTimeRemaining;   // Tiempo restante en segundos
+    private static final int TURN_TIME_LIMIT = 30; // Límite de tiempo por turno (30 segundos)
+    private GamePanel gamePanel;
+
 
     
-    public GamePanel() {
+    public GamePanel(int width, int height) {
+    	this.WIDTH = width; 
+        this.HEIGHT = height; 
+        this.setPreferredSize(new Dimension(WIDTH, HEIGHT));
         this.setPreferredSize(new Dimension(WIDTH, HEIGHT));
         this.setBackground(new Color(34, 139, 34)); // Verde oscuro para el campo
         
@@ -78,7 +95,51 @@ public class GamePanel extends JPanel implements ActionListener, MouseListener, 
         } catch (IOException e) {
             e.printStackTrace();
         }
+        
+        timer = new Timer(16, this); // Timer para actualizaciones del juego
+
+        // Timer para el temporizador del juego
+        gameTimer = new Timer(1000, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                timeRemaining--;
+                if (timeRemaining <= 0) {
+                    endGame();
+                }
+                repaint(); // Redibujar el marcador con el tiempo restante
+            }
+        });
+        
+     // Configuración del temporizador de turno
+        turnTimeRemaining = TURN_TIME_LIMIT;
+        turnTimer = new Timer(1000, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                turnTimeRemaining--;
+                if (turnTimeRemaining <= 0) {
+                    passTurnDueToTimeout(); // Llamar al método que pasa el turno al equipo contrario
+                }
+                repaint(); // Actualizar el encabezado con el tiempo restante
+            }
+        });
     }
+    
+    
+    private void passTurnDueToTimeout() {
+        turnTimer.stop(); // Detener el temporizador del turno
+        isRedTeamTurn = !isRedTeamTurn;
+        canShoot = true;
+
+        // Reiniciar el temporizador del turno
+        startTurnTimer();
+
+        // Reanudar el temporizador del tiempo principal
+        gameTimer.start();
+
+        // Redibujar el campo
+        repaint();
+    }
+
     
     private void initializePlayers() {
         teamRed = new ArrayList<>();
@@ -99,12 +160,65 @@ public class GamePanel extends JPanel implements ActionListener, MouseListener, 
         teamBlue.add(new Player(WIDTH - 160, HEADER_HEIGHT + (FIELD_HEIGHT / 4), Color.BLUE)); // Delantero arriba
         teamBlue.add(new Player(WIDTH - 160, HEADER_HEIGHT + 3 * (FIELD_HEIGHT / 4), Color.BLUE)); // Delantero abajo
     }
+    
+    private void endGame() {
+        timer.stop();
+        gameTimer.stop();
+
+        String winner;
+        if (player1Score > player2Score) {
+            winner = "¡Equipo Rojo gana!";
+        } else if (player2Score > player1Score) {
+            winner = "¡Equipo Azul gana!";
+        } else {
+            winner = "¡Es un empate!";
+        }
+
+        showResultWindow(winner);
+    }
+    
+    private void showResultWindow(String result) {
+        JFrame resultFrame = new JFrame("Resultado del partido");
+        resultFrame.setSize(400, 200);
+        resultFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        resultFrame.setLayout(new BorderLayout());
+
+        // Etiqueta con el resultado
+        JLabel resultLabel = new JLabel(result, SwingConstants.CENTER);
+        resultLabel.setFont(new Font("Arial", Font.BOLD, 20));
+        resultFrame.add(resultLabel, BorderLayout.CENTER);
+
+        // Botón para reiniciar el juego
+        JButton restartButton = new JButton("Reiniciar");
+        restartButton.setFont(new Font("Arial", Font.PLAIN, 16));
+        restartButton.addActionListener(e -> {
+            resultFrame.dispose(); // Cierra la ventana de resultados
+            resetPositions();      // Reinicia las posiciones de jugadores y pelota
+            player1Score = 0;
+            player2Score = 0;
+            timeRemaining = 300;  // Reinicia el tiempo
+            startGame();          // Inicia el juego nuevamente
+        });
+        resultFrame.add(restartButton, BorderLayout.SOUTH);
+
+        // Centrar la ventana en la pantalla
+        resultFrame.setLocationRelativeTo(null);
+        resultFrame.setVisible(true);
+    }
 
 
     
     public void startGame() {
         timer.start();
+        gameTimer.start();
+        startTurnTimer();
     }
+    
+    private void startTurnTimer() {
+        turnTimeRemaining = TURN_TIME_LIMIT; // Reiniciar el tiempo del turno
+        turnTimer.start(); // Iniciar el temporizador del turno
+    }
+
 
     @Override
     public void actionPerformed(ActionEvent e) {
@@ -172,26 +286,30 @@ public class GamePanel extends JPanel implements ActionListener, MouseListener, 
         super.paintComponent(g);
         
         if (backgroundImage != null) {
-            // Definir la altura fija que tendrá la imagen
-            int imageHeight = 720;  // La imagen será de 650 px de alto (puedes ajustarlo a lo que desees)
-            
             // Obtener la altura y el ancho del panel
-            int panelHeight = getHeight();    // 720 px
-            int panelWidth = getWidth();      // 1280 px
+            int panelHeight = getHeight();   
+            int panelWidth = getWidth();   
+            System.out.println("Ancho: " + panelWidth + " Alto: " + panelHeight);
             
             // Calcular la posición Y para que la imagen se dibuje en la parte inferior
-            int yPosition = panelHeight - imageHeight;
+            int yPosition = panelHeight - FIELD_HEIGHT;
 
             // Asegúrate de que la imagen no quede fuera del panel
             if (yPosition < 0) {
                 yPosition = 0;  // Si la imagen es más alta que el panel, ajustamos a la parte superior
             }
 
-            // Dibujar la imagen de fondo con la altura especificada
-            g.drawImage(backgroundImage, 0, yPosition, panelWidth, imageHeight, this);
+            
+            
+            if(panelHeight == 800) {
+            	g.drawImage(backgroundImage, 0, yPosition, panelWidth, FIELD_HEIGHT, this);
+            } else if(panelHeight == 900) {
+            	g.drawImage(backgroundImage, 0, yPosition - 100, panelWidth, FIELD_HEIGHT, this);
+            }
         }
 
         drawHeader(g);
+        
         
         
         // Dibujar jugadores
@@ -201,6 +319,11 @@ public class GamePanel extends JPanel implements ActionListener, MouseListener, 
         for(Player player : teamBlue) {
             player.draw(g);
         }
+        
+        if (!dragging) {
+            drawActiveTeamHighlight(g);
+        }
+        
         
         // Dibujar pelota y goles
         ball.draw(g);
@@ -232,6 +355,10 @@ public class GamePanel extends JPanel implements ActionListener, MouseListener, 
                 dy = (dy / magnitude) * MAX_DRAG_LENGTH;
             }
             
+           
+                
+            
+            
             // Calcular el punto final
             int endX = centerX - (int)dx;
             int endY = centerY - (int)dy;
@@ -248,6 +375,30 @@ public class GamePanel extends JPanel implements ActionListener, MouseListener, 
             drawArrowHead(g2d, centerX, centerY, endX, endY);
         }
     }
+    
+ // Método para dibujar el círculo alrededor de los jugadores del equipo activo
+    private void drawActiveTeamHighlight(Graphics g) {
+        Graphics2D g2d = (Graphics2D) g;
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+        // Seleccionar el equipo activo según el turno
+        ArrayList<Player> activeTeam = isRedTeamTurn ? teamRed : teamBlue;
+        Color highlightColor = isRedTeamTurn ? Color.RED : Color.BLUE;
+
+        // Configurar el color y grosor del círculo
+        g2d.setColor(highlightColor);
+        g2d.setStroke(new BasicStroke(4)); // Grosor del círculo
+
+        // Dibujar un círculo alrededor de cada jugador del equipo activo
+        for (Player player : activeTeam) {
+            int x = player.getX();
+            int y = player.getY();
+            int diameter = player.getDiameter();
+            g2d.drawOval(x - 5, y - 5, diameter + 10, diameter + 10); // Círculo un poco más grande que el jugador
+        }
+    }
+
+    
     
  // Modificar el método drawHeader para mostrar el turno actual
     private void drawHeader(Graphics g) {
@@ -268,11 +419,7 @@ public class GamePanel extends JPanel implements ActionListener, MouseListener, 
         int scoreWidth = fm.stringWidth(score);
         g.drawString(score, (WIDTH - scoreWidth) / 2, 45);
         
-        // Dibujar indicador de turno con el color del equipo actual
-        g.setFont(new Font("Arial", Font.BOLD, 16));
-        String turnText = "Turno: " + (isRedTeamTurn ? "Equipo Rojo" : "Equipo Azul");
-        g.setColor(isRedTeamTurn ? Color.RED : Color.BLUE);
-        g.drawString(turnText, (WIDTH - fm.stringWidth(turnText)) / 2, 70);
+     
         
         // Indicador visual si no pueden disparar
         if (!canShoot) {
@@ -280,6 +427,33 @@ public class GamePanel extends JPanel implements ActionListener, MouseListener, 
             g.setFont(new Font("Arial", Font.ITALIC, 14));
             String waitText = "Esperando a que los jugadores se detengan...";
             g.drawString(waitText, (WIDTH - fm.stringWidth(waitText)) / 2, HEADER_HEIGHT - 10);
+        }
+        
+        g.setColor(new Color(48, 48, 48));
+        g.fillRect(0, 0, WIDTH, HEADER_HEIGHT);
+
+        g.setColor(Color.WHITE);
+        g.setFont(new Font("Arial", Font.BOLD, 20));
+        g.drawString("Equipo Rojo", 50, 30);
+        g.drawString("Equipo Azul", WIDTH - 150, 30);
+
+        // Dibujar marcador
+        g.setFont(new Font("Arial", Font.BOLD, 40));
+        String Endscore = player1Score + " - " + player2Score;
+        g.drawString(Endscore, WIDTH / 2 - g.getFontMetrics().stringWidth(Endscore) / 2, 45);
+
+        // Dibujar tiempo restante
+        g.setFont(new Font("Arial", Font.BOLD, 16));
+        String totalTimeText = String.format("Tiempo restante: %02d:%02d", timeRemaining / 60, timeRemaining % 60);
+        g.drawString(totalTimeText, WIDTH / 2 - g.getFontMetrics().stringWidth(totalTimeText) / 2, 70);
+        
+     // Dibujar tiempo restante del turno
+        g.setFont(new Font("Arial", Font.BOLD, 16));
+        String timeText = String.format("Tiempo del turno: %02d s", turnTimeRemaining);
+        if (isRedTeamTurn) {
+        	g.drawString(timeText, 30, 70);
+        } else {
+        	g.drawString(timeText, WIDTH - 200, 70);
         }
     }
 
@@ -576,7 +750,14 @@ public class GamePanel extends JPanel implements ActionListener, MouseListener, 
     
     @Override
     public void mousePressed(MouseEvent e) {
-        // Solo permitir seleccionar si todo está estático
+        // Detectar clic derecho para cancelar la selección del jugador
+        if (e.getButton() == MouseEvent.BUTTON3 && dragging) {
+            // Cancelar la selección del jugador sin cambiar el turno
+        	cancelShot();
+            return;
+        }
+
+        // Continuar con la lógica del clic izquierdo
         if (!canShoot || !isAllStatic()) {
             return;
         }
@@ -590,11 +771,13 @@ public class GamePanel extends JPanel implements ActionListener, MouseListener, 
                 selectedPlayer = player;
                 dragStart = clickPoint;
                 dragCurrent = clickPoint;
-                dragging = true;
+                dragging = true; // Inicia el arrastre
+                repaint(); // Actualiza la pantalla para eliminar los círculos
                 break;
             }
         }
     }
+
     
     @Override
     public void mouseReleased(MouseEvent e) {
@@ -621,14 +804,18 @@ public class GamePanel extends JPanel implements ActionListener, MouseListener, 
             dragCurrent = null;
             dragging = false;
 
-            // Esperar a que todo esté estático antes de cambiar el turno
+            // Detener el temporizador del turno
+            turnTimer.stop();
+
+            // Verificar si todo está estático antes de cambiar el turno
             Timer checkStaticTimer = new Timer(100, new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     if (isAllStatic()) {
                         canShoot = true;
                         isRedTeamTurn = !isRedTeamTurn; // Cambiar el turno
-                        ((Timer)e.getSource()).stop();
+                        startTurnTimer(); // Reiniciar el temporizador del turno
+                        ((Timer) e.getSource()).stop();
                     }
                 }
             });
@@ -637,6 +824,7 @@ public class GamePanel extends JPanel implements ActionListener, MouseListener, 
             repaint();
         }
     }
+
     @Override
     public void mouseDragged(MouseEvent e) {
         if (dragging && selectedPlayer != null) {
@@ -652,6 +840,18 @@ public class GamePanel extends JPanel implements ActionListener, MouseListener, 
             repaint();
         }
     }
+    
+    private void cancelShot() {
+        selectedPlayer = null;
+        dragStart = null;
+        dragCurrent = null;
+        dragging = false;     
+
+        repaint(); // Redibujar el campo
+    }
+    
+
+
     
     private void handlePostCollision(Ball ball) {
         // Rebote al chocar con el poste, reduce la velocidad
