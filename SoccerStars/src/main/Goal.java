@@ -1,7 +1,9 @@
 package main;
 
+import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Rectangle;
 
 public class Goal {
@@ -9,11 +11,12 @@ public class Goal {
     private int width = 20;    
     private int height = 120;  
     private int POST_WIDTH = 20;
-    private int POST_HEIGHT = 15; 
+    private int POST_HEIGHT = 260; 
     private boolean isLeftGoal; 
     private Rectangle leftPost;
     private Rectangle rightPost;
     private Rectangle crossbar;
+    public Rectangle goalArea;
    
     public Goal(int x, int y, boolean isLeftGoal) {
         this.x = x;
@@ -22,7 +25,7 @@ public class Goal {
 
         leftPost = new Rectangle(
                 isLeftGoal ? x + 50 : x - 50, 
-                isLeftGoal ? y : y - 40,
+                isLeftGoal ? y - 250 : y - 290,
                 POST_WIDTH,
                 POST_HEIGHT
             );
@@ -42,29 +45,42 @@ public class Goal {
             POST_WIDTH + POST_WIDTH, 
             POST_HEIGHT
         );
+        
+        goalArea = new Rectangle(
+                isLeftGoal ? x + 35 : x - 45,
+                isLeftGoal ? y + 50 : y,
+                30,
+                height
+            );
     }
 
    
     public void draw(Graphics g) {
-        g.setColor(Color.RED);
+        // Convertir el objeto Graphics a Graphics2D para acceder a métodos avanzados
+        Graphics2D g2d = (Graphics2D) g;
 
-        // Dibujar poste izquierdo
-        g.fillRect(leftPost.x, leftPost.y, leftPost.width, leftPost.height);
-        g.fillRect(rightPost.x, rightPost.y, rightPost.width, rightPost.height);
+        // Establecer la transparencia (valor entre 0.0 y 1.0)
+        float alpha = 0.0f;  // Puedes ajustar este valor para mayor o menor transparencia
+        g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
 
-        // Dibujar travesaño
-        //g.fillRect(crossbar.x, crossbar.y, crossbar.width, crossbar.height);
+        // Establecer el color de los rectángulos
+        g2d.setColor(Color.RED);  // Cambia el color según lo necesites
+
+        // Dibujar el poste izquierdo con transparencia
+        g2d.fillRect(leftPost.x, leftPost.y, leftPost.width, leftPost.height);
+        // Dibujar el poste derecho con transparencia
+        g2d.fillRect(rightPost.x, rightPost.y, rightPost.width, rightPost.height);
+
+        // Dibujar el travesaño si lo deseas
+        // g2d.fillRect(crossbar.x, crossbar.y, crossbar.width, crossbar.height);
+        
+        g2d.fillRect(goalArea.x, goalArea.y, goalArea.width, goalArea.height);
     }
 
    
     
     public boolean checkGoal(Ball ball) {
-        Rectangle goalArea = new Rectangle(
-            isLeftGoal ? x - 10 : x,
-            y,
-            30,
-            height
-        );
+        
         return goalArea.intersects(
             ball.getX(),
             ball.getY(),

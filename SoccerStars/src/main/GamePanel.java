@@ -327,8 +327,7 @@ public class GamePanel extends JPanel implements ActionListener, MouseListener, 
         
         // Dibujar pelota y goles
         ball.draw(g);
-        leftGoal.draw(g);
-        rightGoal.draw(g);
+       
         
      // Dibujar línea de dirección si estamos arrastrando
         if (dragging && selectedPlayer != null && dragStart != null && dragCurrent != null) {
@@ -374,6 +373,9 @@ public class GamePanel extends JPanel implements ActionListener, MouseListener, 
             // Dibujar punta de flecha
             drawArrowHead(g2d, centerX, centerY, endX, endY);
         }
+        
+        leftGoal.draw(g);
+        rightGoal.draw(g);
     }
     
  // Método para dibujar el círculo alrededor de los jugadores del equipo activo
