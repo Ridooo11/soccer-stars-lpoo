@@ -6,7 +6,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public class Menu extends JPanel implements ActionListener {
-    private Dimension currentResolution;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -8580681604140020157L;
+	private Dimension currentResolution;
     private JButton playButton;
     private JButton volumeButton;
     private JButton tutorialButton;

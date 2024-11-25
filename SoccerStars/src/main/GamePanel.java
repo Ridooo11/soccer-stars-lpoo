@@ -458,42 +458,6 @@ public class GamePanel extends JPanel implements ActionListener, MouseListener, 
         	g.drawString(timeText, WIDTH - 200, 70);
         }
     }
-
-
- // Modificar el método de dibujo del campo
-    private void drawField(Graphics g) {
-        // Dibujar círculo central
-        g.setColor(Color.WHITE);
-        int circleDiameter = 120;
-        g.drawOval(WIDTH/2 - circleDiameter/2, 
-                   HEADER_HEIGHT + (FIELD_HEIGHT/2) - circleDiameter/2, 
-                   circleDiameter, 
-                   circleDiameter);
-        
-        // Línea central
-        g.drawLine(WIDTH/2, HEADER_HEIGHT, WIDTH/2, HEIGHT);
-        
-        // Áreas de los arcos (opcional)
-        int areaWidth = 150;
-        int areaHeight = 300;
-        // Área izquierda
-        g.drawRect(0, HEADER_HEIGHT + (FIELD_HEIGHT - areaHeight)/2, areaWidth, areaHeight);
-        // Área derecha
-        g.drawRect(WIDTH - areaWidth, HEADER_HEIGHT + (FIELD_HEIGHT - areaHeight)/2, areaWidth, areaHeight);
-    }
-    
-    private void drawScore(Graphics g) {
-        g.setColor(Color.WHITE);
-        g.setFont(new Font("Arial", Font.BOLD, 30));
-        g.drawString(player1Score + " - " + player2Score, WIDTH/2 - 40, 30);
-    }
-    
-    private void drawTurnIndicator(Graphics g) {
-        g.setColor(Color.YELLOW);
-        g.setFont(new Font("Arial", Font.BOLD, 20));
-        String turnText = "Turno: " + (isPlayer1Turn ? "Jugador 1" : "Jugador 2");
-        g.drawString(turnText, WIDTH/2 - 60, 60);
-    }
     
     private void drawForceIndicator(Graphics2D g2d, double magnitude) {
         if (selectedPlayer != null) {

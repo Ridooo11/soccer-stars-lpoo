@@ -56,22 +56,22 @@ public class Goal {
 
    
     public void draw(Graphics g) {
-        // Convertir el objeto Graphics a Graphics2D para acceder a métodos avanzados
+        
         Graphics2D g2d = (Graphics2D) g;
 
-        // Establecer la transparencia (valor entre 0.0 y 1.0)
-        float alpha = 0.0f;  // Puedes ajustar este valor para mayor o menor transparencia
+        
+        float alpha = 0.0f;  
         g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
 
-        // Establecer el color de los rectángulos
-        g2d.setColor(Color.RED);  // Cambia el color según lo necesites
+        
+        g2d.setColor(Color.RED);  
 
-        // Dibujar el poste izquierdo con transparencia
+        
         g2d.fillRect(leftPost.x, leftPost.y, leftPost.width, leftPost.height);
-        // Dibujar el poste derecho con transparencia
+        
         g2d.fillRect(rightPost.x, rightPost.y, rightPost.width, rightPost.height);
 
-        // Dibujar el travesaño si lo deseas
+        
         // g2d.fillRect(crossbar.x, crossbar.y, crossbar.width, crossbar.height);
         
         g2d.fillRect(goalArea.x, goalArea.y, goalArea.width, goalArea.height);
