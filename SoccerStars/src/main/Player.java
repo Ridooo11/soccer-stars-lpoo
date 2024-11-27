@@ -38,13 +38,43 @@ public class Player {
         }
     }
     
- // Método para colisión con otro jugador
     public boolean collidesWithPlayer(Player other) {
+        // Calcula la distancia entre los centros de los jugadores
         double dx = (x + DIAMETER / 2) - (other.getX() + other.getDiameter() / 2);
         double dy = (y + DIAMETER / 2) - (other.getY() + other.getDiameter() / 2);
         double distance = Math.sqrt(dx * dx + dy * dy);
-        return distance < (DIAMETER / 2 + other.getDiameter() / 2);
+
+        // Si hay colisión
+        if (distance < (DIAMETER / 2 + other.getDiameter() / 2)) {
+            // Normalizar el vector de colisión
+            double overlap = (DIAMETER / 2 + other.getDiameter() / 2) - distance; // Cuánto se superponen
+            double nx = dx / distance; // Dirección normalizada en X
+            double ny = dy / distance; // Dirección normalizada en Y
+
+            // Factor de corrección: controla cuánto se mueven los jugadores
+            double correctionFactor = 0.5; // Ajusta este valor para suavizar el movimiento (0.5 mueve ambos por igual)
+
+            // Separar a los jugadores suavemente
+            x -= nx * overlap * correctionFactor;
+            y -= ny * overlap * correctionFactor;
+            other.setPosition(
+                other.getX() + nx * overlap * (1 - correctionFactor),
+                other.getY() + ny * overlap * (1 - correctionFactor)
+            );
+
+            // Ajustar las velocidades para simular pérdida de energía (opcional)
+            velX *= 0.5;
+            velY *= 0.5;
+            other.setVelocity(other.getVelX() * 0.5, other.getVelY() * 0.5);
+
+            return true;
+        }
+
+        return false;
     }
+
+
+
     
     // Getters y setters necesarios
     public double getVelX() {
