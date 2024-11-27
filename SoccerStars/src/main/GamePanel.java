@@ -440,9 +440,16 @@ public class GamePanel extends JPanel implements ActionListener, MouseListener, 
             int x = player.getX();
             int y = player.getY();
             int diameter = player.getDiameter();
-            g2d.drawOval(x, y, diameter, diameter); // Círculo un poco más grande que el jugador
+
+            // Ajustar si hay margen en el sprite (reducir un 10% por ejemplo)
+            int adjustedDiameter = (int) (diameter * 0.9); // Reducir el diámetro un 10%
+            int offset = (diameter - adjustedDiameter) / 2; // Offset para centrar el círculo
+
+            // Dibujar un círculo ajustado alrededor del sprite
+            g2d.drawOval(x + offset, y + offset, adjustedDiameter, adjustedDiameter);
         }
     }
+
 
     
     
