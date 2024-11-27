@@ -14,4 +14,51 @@
 	<natures>
 		<nature>org.eclipse.jdt.core.javanature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>src/resources/Flag_of_Argentina.svg.png</name>
+			<type>1</type>
+			<location>/Users/romanrey/Downloads/Flag_of_Argentina.svg.png</location>
+		</link>
+		<link>
+			<name>src/resources/Flag_of_Brazil.svg.png</name>
+			<type>1</type>
+			<location>/Users/romanrey/Downloads/Flag_of_Brazil.svg.png</location>
+		</link>
+		<link>
+			<name>src/resources/Flag_of_New_Zealand.svg.png</name>
+			<type>1</type>
+			<location>/Users/romanrey/Downloads/Flag_of_New_Zealand.svg.png</location>
+		</link>
+		<link>
+			<name>src/resources/Flag_of_Palestine.svg.png</name>
+			<type>1</type>
+			<location>/Users/romanrey/Downloads/Flag_of_Palestine.svg.png</location>
+		</link>
+		<link>
+			<name>src/resources/eleccionEquipos.png</name>
+			<type>1</type>
+			<location>/Users/romanrey/Downloads/eleccionEquipos.png</location>
+		</link>
+		<link>
+			<name>src/resources/fondo.jpg</name>
+			<type>1</type>
+			<location>/Users/romanrey/Downloads/fondo.jpg</location>
+		</link>
+		<link>
+			<name>src/resources/tutorial1.png</name>
+			<type>1</type>
+			<location>/Users/romanrey/Desktop/tutorial1.png</location>
+		</link>
+		<link>
+			<name>src/resources/tutorial2.png</name>
+			<type>1</type>
+			<location>/Users/romanrey/Desktop/tutorial2.png</location>
+		</link>
+		<link>
+			<name>src/resources/tutorial3.png</name>
+			<type>1</type>
+			<location>/Users/romanrey/Desktop/tutorial3.png</location>
+		</link>
+	</linkedResources>
 </projectDescription>
