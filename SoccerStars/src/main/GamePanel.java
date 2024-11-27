@@ -49,7 +49,7 @@ public class GamePanel extends JPanel implements ActionListener, MouseListener, 
     private static final int PLAYERS_PER_TEAM = 5;
     private ArrayList<Player> teamRed;
     private ArrayList<Player> teamBlue;
-    private boolean isRedTeamTurn = true; // true para equipo rojo, false para equipo azul
+    private boolean isRedTeamTurn = true; 
     private Player selectedPlayer;
     private BufferedImage backgroundImage;
     private BufferedImage argImage;
@@ -213,9 +213,9 @@ public class GamePanel extends JPanel implements ActionListener, MouseListener, 
 
         String winner;
         if (player1Score > player2Score) {
-            winner = "¡Equipo Rojo gana!";
+            winner = team1 + " gana!";
         } else if (player2Score > player1Score) {
-            winner = "¡Equipo Azul gana!";
+            winner = team2 + " gana";
         } else {
             winner = "¡Es un empate!";
         }
@@ -312,9 +312,11 @@ public class GamePanel extends JPanel implements ActionListener, MouseListener, 
         if (leftGoal.checkGoal(ball)) {
             player2Score++;
             resetPositions();
+            isRedTeamTurn = true;
         } else if (rightGoal.checkGoal(ball)) {
             player1Score++;
             resetPositions();
+            isRedTeamTurn = false;
         }
     }
     
