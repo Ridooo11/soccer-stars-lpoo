@@ -6,28 +6,36 @@ import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Rectangle;
 
+import javax.swing.ImageIcon;
+
 public class Player {
 	private int x, y;
     private double velX, velY;
-    final int DIAMETER = 40;
+    int DIAMETER = 50;
     private final double FRICTION = 0.974;
     private final double FORCE_MULTIPLIER = 0.2;
     private final double COLLISION_ELASTICITY = 0.8;
     private Color teamColor; // Nuevo: color del equipo
+    private ImageIcon playerImage;
     
-    public Player(int x, int y, Color teamColor) {
+    public Player(int x, int y, Color teamColor, ImageIcon playerImage) {
         this.x = x;
         this.y = y;
         this.teamColor = teamColor;
+        this.playerImage = playerImage;
     }
     
     // Modificar el método draw para usar el color del equipo
     public void draw(Graphics g) {
-        g.setColor(teamColor);
-        g.fillOval(x, y, DIAMETER, DIAMETER);
-        // Agregar un borde blanco para mejor visibilidad
-        g.setColor(Color.WHITE);
-        g.drawOval(x, y, DIAMETER, DIAMETER);
+        // Dibujar la imagen del jugador
+        if (playerImage != null) {
+        	g.drawImage(playerImage.getImage(), x, y, DIAMETER, DIAMETER, null);  // Dibujar la imagen en las coordenadas (x, y)
+        } else {
+            g.setColor(Color.GRAY);  // Si no hay imagen, dibujamos un círculo gris
+            g.fillOval(x, y, DIAMETER, DIAMETER);
+            g.setColor(Color.WHITE);
+            g.drawOval(x, y, DIAMETER, DIAMETER);
+        }
     }
     
  // Método para colisión con otro jugador

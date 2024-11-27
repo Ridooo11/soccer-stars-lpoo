@@ -1,6 +1,7 @@
 
 package main;
 
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -51,6 +52,7 @@ public class GamePanel extends JPanel implements ActionListener, MouseListener, 
     private boolean isRedTeamTurn = true; // true para equipo rojo, false para equipo azul
     private Player selectedPlayer;
     private BufferedImage backgroundImage;
+    private BufferedImage argImage;
     
     private Timer gameTimer; // Temporizador del juego
     private int timeRemaining = 300; // Tiempo en segundos (5 minutos)
@@ -58,21 +60,27 @@ public class GamePanel extends JPanel implements ActionListener, MouseListener, 
     private int turnTimeRemaining;   // Tiempo restante en segundos
     private static final int TURN_TIME_LIMIT = 30; // Límite de tiempo por turno (30 segundos)
     private GamePanel gamePanel;
+    
+    private String team1, team2; // Equipos seleccionados
+    private ImageIcon team1Image, team2Image; // Usando ImageIcon para las imágenes
 
 
     
-    public GamePanel(int width, int height) {
+    public GamePanel(int width, int height, String team1, String team2) {
     	this.WIDTH = width; 
         this.HEIGHT = height; 
         this.setPreferredSize(new Dimension(WIDTH, HEIGHT));
         this.setPreferredSize(new Dimension(WIDTH, HEIGHT));
         this.setBackground(new Color(34, 139, 34)); // Verde oscuro para el campo
         
+        this.team1 = team1;
+        this.team2 = team2;
+        
         // Inicializar equipos
-        initializePlayers();
+        loadTeamImages(); // Cargar imágenes
         
         // Inicializar pelota y goles
-        ball = new Ball(WIDTH / 2, HEADER_HEIGHT + (FIELD_HEIGHT / 2));
+        ball = new Ball(WIDTH / 2 - 20, HEADER_HEIGHT + (FIELD_HEIGHT / 2) - 20);
         leftGoal = new Goal(0, HEADER_HEIGHT + (FIELD_HEIGHT/2) - 100, true);
         rightGoal = new Goal(WIDTH - 20, HEADER_HEIGHT + (FIELD_HEIGHT/2) - 60, false);
         
@@ -122,7 +130,42 @@ public class GamePanel extends JPanel implements ActionListener, MouseListener, 
                 repaint(); // Actualizar el encabezado con el tiempo restante
             }
         });
+        
+        initializePlayers();
     }
+    
+    
+
+    private void loadTeamImages() {
+        team1Image = loadImageForTeam(team1);  // Usamos ImageIcon para cargar la imagen
+        team2Image = loadImageForTeam(team2);
+    }
+
+    private ImageIcon loadImageForTeam(String team) {
+        try {
+            // Ruta de la imagen
+            String path = "/resources/" + team.toLowerCase().replace(" ", "_") + "_player.png";
+            InputStream is = getClass().getResourceAsStream(path);
+
+            // Verificar si la imagen se encuentra
+            if (is == null) {
+                System.out.println("Error: no se encontró la imagen en la ruta " + path);
+                return null;
+            }
+
+            // Cargar la imagen con ImageIcon
+            ImageIcon icon = new ImageIcon(is.readAllBytes());
+
+            // Redimensionar la imagen para que tenga el tamaño correcto (40x40)
+            Image img = icon.getImage().getScaledInstance(40, 40, Image.SCALE_SMOOTH);
+            return new ImageIcon(img);  // Devolver el ImageIcon redimensionado
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+
     
     
     private void passTurnDueToTimeout() {
@@ -145,20 +188,23 @@ public class GamePanel extends JPanel implements ActionListener, MouseListener, 
         teamRed = new ArrayList<>();
         teamBlue = new ArrayList<>();
 
-        // Agregar el arquero al equipo rojo
-        teamRed.add(new Player(200, HEADER_HEIGHT + (FIELD_HEIGHT / 2), Color.RED)); // Centro
-        teamRed.add(new Player(80, HEADER_HEIGHT + (FIELD_HEIGHT / 3), Color.RED)); // Arriba
-        teamRed.add(new Player(80, HEADER_HEIGHT + 2 * (FIELD_HEIGHT / 3), Color.RED)); // Abajo
-        teamRed.add(new Player(160, HEADER_HEIGHT + (FIELD_HEIGHT / 4), Color.RED)); // Delantero arriba
-        teamRed.add(new Player(160, HEADER_HEIGHT + 3 * (FIELD_HEIGHT / 4), Color.RED)); // Delantero abajo
+        
+        Goalkeeper goalkeeperRed = new Goalkeeper(80, HEADER_HEIGHT + (FIELD_HEIGHT / 2) - 20, Color.RED, team1Image, 60);
+        teamRed.add(new Player(200, HEADER_HEIGHT + (FIELD_HEIGHT / 3) + 20, Color.RED, team1Image)); 
+        teamRed.add(new Player(200, HEADER_HEIGHT + (FIELD_HEIGHT / 3) + 180, Color.RED, team1Image)); 
+        teamRed.add(new Player(300, HEADER_HEIGHT + (FIELD_HEIGHT / 4) + 150, Color.RED, team1Image)); 
+        teamRed.add(new Player(400, HEADER_HEIGHT + (FIELD_HEIGHT / 4) + 150, Color.RED, team1Image)); 
 
 
-        // Agregar el arquero al equipo azul
-        teamBlue.add(new Player(WIDTH - 200, HEADER_HEIGHT + (FIELD_HEIGHT / 2), Color.BLUE)); // Centro
-        teamBlue.add(new Player(WIDTH - 80, HEADER_HEIGHT + (FIELD_HEIGHT / 3), Color.BLUE)); // Arriba
-        teamBlue.add(new Player(WIDTH - 80, HEADER_HEIGHT + 2 * (FIELD_HEIGHT / 3), Color.BLUE)); // Abajo
-        teamBlue.add(new Player(WIDTH - 160, HEADER_HEIGHT + (FIELD_HEIGHT / 4), Color.BLUE)); // Delantero arriba
-        teamBlue.add(new Player(WIDTH - 160, HEADER_HEIGHT + 3 * (FIELD_HEIGHT / 4), Color.BLUE)); // Delantero abajo
+       
+        Goalkeeper goalkeeperBlue = new Goalkeeper(WIDTH - 140, HEADER_HEIGHT + (FIELD_HEIGHT / 2) - 22, Color.BLUE, team2Image, 60);
+        teamBlue.add(new Player(WIDTH - 250, HEADER_HEIGHT + (FIELD_HEIGHT / 3) + 100, Color.BLUE, team2Image)); 
+        teamBlue.add(new Player(WIDTH - 350, HEADER_HEIGHT + (FIELD_HEIGHT / 3) + 100, Color.BLUE, team2Image)); 
+        teamBlue.add(new Player(WIDTH - 450, HEADER_HEIGHT + (FIELD_HEIGHT / 4) + 100, Color.BLUE, team2Image));
+        teamBlue.add(new Player(WIDTH - 450, HEADER_HEIGHT + (FIELD_HEIGHT / 4) + 200, Color.BLUE, team2Image)); 
+        
+        teamRed.add(goalkeeperRed);
+        teamBlue.add(goalkeeperBlue);
     }
     
     private void endGame() {
@@ -274,7 +320,7 @@ public class GamePanel extends JPanel implements ActionListener, MouseListener, 
     
     // Modificar el método resetPositions
     private void resetPositions() {
-        ball.setPosition(WIDTH / 2, HEADER_HEIGHT + (FIELD_HEIGHT / 2));
+        ball.setPosition(WIDTH / 2 - 20, HEADER_HEIGHT + (FIELD_HEIGHT / 2) - 20);
         ball.setVelocity(0, 0);
         initializePlayers();
         canShoot = true;
@@ -289,7 +335,6 @@ public class GamePanel extends JPanel implements ActionListener, MouseListener, 
             // Obtener la altura y el ancho del panel
             int panelHeight = getHeight();   
             int panelWidth = getWidth();   
-            System.out.println("Ancho: " + panelWidth + " Alto: " + panelHeight);
             
             // Calcular la posición Y para que la imagen se dibuje en la parte inferior
             int yPosition = panelHeight - FIELD_HEIGHT;
@@ -310,20 +355,19 @@ public class GamePanel extends JPanel implements ActionListener, MouseListener, 
 
         drawHeader(g);
         
-        
-        
-        // Dibujar jugadores
-        for(Player player : teamRed) {
-            player.draw(g);
-        }
-        for(Player player : teamBlue) {
-            player.draw(g);
-        }
-        
         if (!dragging) {
             drawActiveTeamHighlight(g);
         }
         
+        for (Player player : teamRed) {
+            player.draw(g); // Dibuja el jugador del equipo rojo
+        }
+
+        for (Player player : teamBlue) {
+            player.draw(g); // Dibuja el jugador del equipo azul
+        }
+        
+      
         
         // Dibujar pelota y goles
         ball.draw(g);
@@ -385,18 +429,18 @@ public class GamePanel extends JPanel implements ActionListener, MouseListener, 
 
         // Seleccionar el equipo activo según el turno
         ArrayList<Player> activeTeam = isRedTeamTurn ? teamRed : teamBlue;
-        Color highlightColor = isRedTeamTurn ? Color.RED : Color.BLUE;
+        Color highlightColor = isRedTeamTurn ? Color.RED : Color.RED;
 
         // Configurar el color y grosor del círculo
         g2d.setColor(highlightColor);
-        g2d.setStroke(new BasicStroke(4)); // Grosor del círculo
+        g2d.setStroke(new BasicStroke(2)); // Grosor del círculo
 
         // Dibujar un círculo alrededor de cada jugador del equipo activo
         for (Player player : activeTeam) {
             int x = player.getX();
             int y = player.getY();
             int diameter = player.getDiameter();
-            g2d.drawOval(x - 5, y - 5, diameter + 10, diameter + 10); // Círculo un poco más grande que el jugador
+            g2d.drawOval(x, y, diameter, diameter); // Círculo un poco más grande que el jugador
         }
     }
 
@@ -436,8 +480,8 @@ public class GamePanel extends JPanel implements ActionListener, MouseListener, 
 
         g.setColor(Color.WHITE);
         g.setFont(new Font("Arial", Font.BOLD, 20));
-        g.drawString("Equipo Rojo", 50, 30);
-        g.drawString("Equipo Azul", WIDTH - 150, 30);
+        g.drawString(team1, 50, 30);
+        g.drawString(team2, WIDTH - 150, 30);
 
         // Dibujar marcador
         g.setFont(new Font("Arial", Font.BOLD, 40));
@@ -816,25 +860,12 @@ public class GamePanel extends JPanel implements ActionListener, MouseListener, 
         repaint(); // Redibujar el campo
     }
     
-
-
-    
-    private void handlePostCollision(Ball ball) {
-        // Rebote al chocar con el poste, reduce la velocidad
-        ball.setVelocity(-ball.getVelX() * 0.5, -ball.getVelY() * 0.5);
-    }
-
-    private void handlePostCollision(Player player) {
-        // Rebote para el jugador al chocar con el poste
-        player.setVelocity(-player.getVelX() * 0.5, -player.getVelY() * 0.5);
-    }
-    
     
 
 
     
 
-    // Método para activar/desactivar el modo de efecto
+    
     public void toggleSpinMode() {
         isSpinEnabled = !isSpinEnabled;
     }

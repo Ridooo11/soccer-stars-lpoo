@@ -2,24 +2,16 @@ package main;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
-public class Menu extends JPanel implements ActionListener {
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = -8580681604140020157L;
-	private Dimension currentResolution;
-    private JButton playButton;
-    private JButton volumeButton;
-    private JButton tutorialButton;
-    private JButton resolutionButton;
-    private JSlider volumeSlider;
+public class Menu extends JPanel {
+    private static final long serialVersionUID = 1L;
+    private Dimension currentResolution;
+    private JButton playButton, volumeButton, resolutionButton;
 
     public Menu() {
         setResolution(new Dimension(1280, 800)); // Resolución inicial
         setLayout(new GridBagLayout());
+        setBackground(new Color(34, 139, 34)); // Fondo verde estilo campo de fútbol
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(20, 20, 20, 20);
@@ -28,29 +20,53 @@ public class Menu extends JPanel implements ActionListener {
         gbc.weighty = 1.0;
         gbc.fill = GridBagConstraints.BOTH;
 
-        // Botón Jugar
+        // Título del juego
+        JLabel title = new JLabel("Soccer Stars", SwingConstants.CENTER);
+        title.setFont(new Font("Arial", Font.BOLD, 48));
+        title.setForeground(Color.WHITE);
         gbc.gridy = 0;
-        playButton = new JButton("Jugar");
-        playButton.addActionListener(this);
+        add(title, gbc);
+
+        // Botón Jugar
+        gbc.gridy = 1;
+        playButton = createButton("JUGAR");
+        playButton.addActionListener(e -> showTeamSelectionWindow());
         add(playButton, gbc);
 
-        // Botón de Configuración de Volumen
-        gbc.gridy = 1;
-        volumeButton = new JButton("Volumen");
-        volumeButton.addActionListener(e -> showVolumeOptions());
+        // Botón Configuración de Volumen
+        gbc.gridy = 2;
+        volumeButton = createButton("CONFIGURAR VOLUMEN");
+        volumeButton.addActionListener(e -> showVolumeWindow());
         add(volumeButton, gbc);
 
-        // Botón de Configuración de Resolución
-        gbc.gridy = 2;
-        resolutionButton = new JButton("Resolucion");
-        resolutionButton.addActionListener(e -> showResolutionOptions());
+        // Botón Configuración de Resolución
+        gbc.gridy = 3;
+        resolutionButton = createButton("CONFIGURAR RESOLUCIÓN");
+        resolutionButton.addActionListener(e -> showResolutionWindow());
         add(resolutionButton, gbc);
 
-        // Botón de Tutorial
-        gbc.gridy = 3;
-        tutorialButton = new JButton("Tutorial");
-        tutorialButton.addActionListener(e -> showTutorial());
-        add(tutorialButton, gbc);
+        
+    }
+
+    private JButton createButton(String text) {
+        JButton button = new JButton(text);
+        button.setFont(new Font("Arial", Font.BOLD, 24));
+        button.setForeground(Color.WHITE);
+        button.setBackground(new Color(0, 102, 0)); // Verde oscuro para botones
+        button.setFocusPainted(false);
+        button.setBorder(BorderFactory.createLineBorder(Color.WHITE, 3));
+        button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        return button;
+    }
+
+    private JFrame createStyledFrame(String title) {
+        JFrame frame = new JFrame(title);
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        frame.setSize(500, 400);
+        frame.setLayout(new BorderLayout());
+        frame.getContentPane().setBackground(new Color(34, 139, 34)); // Fondo verde campo de fútbol
+        frame.setLocationRelativeTo(null);
+        return frame;
     }
 
     private void setResolution(Dimension resolution) {
@@ -58,130 +74,120 @@ public class Menu extends JPanel implements ActionListener {
         setPreferredSize(currentResolution);
     }
 
-    private void showVolumeOptions() {
-        volumeSlider = new JSlider(0, 100, 50); 
+    private void showVolumeWindow() {
+        JFrame volumeFrame = createStyledFrame("Configuración de Volumen");
+
+        JLabel titleLabel = new JLabel("Ajustar Volumen", SwingConstants.CENTER);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
+        titleLabel.setForeground(Color.WHITE);
+
+        JSlider volumeSlider = new JSlider(0, 100, 50);
         volumeSlider.setMajorTickSpacing(10);
         volumeSlider.setPaintTicks(true);
         volumeSlider.setPaintLabels(true);
+        volumeSlider.setForeground(Color.WHITE);
+        volumeSlider.setBackground(new Color(34, 139, 34));
 
-        int result = JOptionPane.showConfirmDialog(this, volumeSlider, "Configuración de Volumen", JOptionPane.OK_CANCEL_OPTION);
-        if (result == JOptionPane.OK_OPTION) {
-            int volume = volumeSlider.getValue();
-            System.out.println("Volumen ajustado a: " + volume);
-        }
+        JButton saveButton = createButton("GUARDAR");
+        saveButton.addActionListener(e -> {
+            System.out.println("Volumen ajustado a: " + volumeSlider.getValue());
+            volumeFrame.dispose();
+        });
+
+        volumeFrame.add(titleLabel, BorderLayout.NORTH);
+        volumeFrame.add(volumeSlider, BorderLayout.CENTER);
+        volumeFrame.add(saveButton, BorderLayout.SOUTH);
+        volumeFrame.setVisible(true);
     }
 
-    private void showResolutionOptions() {
+    private void showResolutionWindow() {
+        JFrame resolutionFrame = createStyledFrame("Configuración de Resolución");
+
+        JLabel titleLabel = new JLabel("Seleccionar Resolución", SwingConstants.CENTER);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
+        titleLabel.setForeground(Color.WHITE);
+
+        JPanel buttonPanel = new JPanel(new GridLayout(3, 2, 10, 10));
+        buttonPanel.setBackground(new Color(34, 139, 34));
+
         String[] resolutions = {"800x600", "1024x768", "1280x800", "1600x900", "1920x1080"};
-        String selectedResolution = (String) JOptionPane.showInputDialog(this, "Selecciona la resolución:",
-                "Configuración de Resolución", JOptionPane.PLAIN_MESSAGE, null, resolutions, resolutions[0]);
-
-        if (selectedResolution != null) {
-            switch (selectedResolution) {
-                case "800x600":
-                    setResolution(new Dimension(800, 600));
-                    break;
-                case "1024x768":
-                    setResolution(new Dimension(1024, 768));
-                    break;
-                case "1280x800":
-                    setResolution(new Dimension(1280, 800));
-                    break;
-                case "1600x900":
-                    setResolution(new Dimension(1600, 900));
-                    break;
-                case "1920x1080":
-                    setResolution(new Dimension(1920, 1080));
-                    break;
-            }
-            JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
-            if (topFrame != null) {
-                topFrame.pack();
-                topFrame.setLocationRelativeTo(null); 
-            }
-            updatePlayerPositions(); // Actualizar posiciones de jugadores
-            repaint(); // Redibujar el menú
+        for (String resolution : resolutions) {
+            JButton resolutionButton = createButton(resolution);
+            resolutionButton.addActionListener(e -> {
+                switch (resolution) {
+                    case "800x600" -> setResolution(new Dimension(800, 600));
+                    case "1024x768" -> setResolution(new Dimension(1024, 768));
+                    case "1280x800" -> setResolution(new Dimension(1280, 800));
+                    case "1600x900" -> setResolution(new Dimension(1600, 900));
+                    case "1920x1080" -> setResolution(new Dimension(1920, 1080));
+                }
+                resolutionFrame.dispose();
+                JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
+                if (topFrame != null) {
+                    topFrame.pack();
+                    topFrame.setLocationRelativeTo(null);
+                }
+            });
+            buttonPanel.add(resolutionButton);
         }
+
+        resolutionFrame.add(titleLabel, BorderLayout.NORTH);
+        resolutionFrame.add(buttonPanel, BorderLayout.CENTER);
+        resolutionFrame.setVisible(true);
     }
 
-    private void updatePlayerPositions() {
-        // Aquí puedes implementar la lógica para ajustar las posiciones de los jugadores según la resolución
-    }
 
-    private void showTutorial() {
-        String tutorialText = "Este es un tutorial para jugar.\n" +
-                "1. Usa el mouse para seleccionar un jugador.\n" +
-                "2. Arrastra para definir la dirección y fuerza del tiro.\n" +
-                "3. Usa el botón de Jugar para comenzar.\n" +
-                "¡Diviértete!";
-        JOptionPane.showMessageDialog(this, tutorialText, "Tutorial", JOptionPane.INFORMATION_MESSAGE);
-    }
+    private String team1 = ""; // Equipo del Jugador 1
+    private String team2 = ""; // Equipo del Jugador 2
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == playButton) {
-            showTeamSelection(); 
-        }
-    }
-    
-    private void showTeamSelection() {
-        String[] teams = {"Equipo A", "Equipo B", "Equipo C", "Equipo D"};
+    private void showTeamSelectionWindow() {
+        JFrame teamFrame = createStyledFrame("Selección de Equipos");
+
+        String[] teams = {"Argentina", "Nueva Zelanda", "Brasil", "Palestina"};
         JComboBox<String> teamSelection1 = new JComboBox<>(teams);
         JComboBox<String> teamSelection2 = new JComboBox<>(teams);
 
-        JPanel panel = new JPanel(new GridLayout(2, 2));
-        panel.add(new JLabel("Equipo para Jugador 1:  "));
+        JPanel panel = new JPanel(new GridLayout(2, 2, 10, 10));
+        panel.setBackground(new Color(34, 139, 34));
+        panel.add(createStyledLabel("Jugador 1:"));
         panel.add(teamSelection1);
-        panel.add(new JLabel("Equipo para Jugador 2:  "));
+        panel.add(createStyledLabel("Jugador 2:"));
         panel.add(teamSelection2);
 
-        int result = JOptionPane.showConfirmDialog(this, panel, "Seleccionar Equipos", JOptionPane.OK_CANCEL_OPTION);
-        if (result == JOptionPane.OK_OPTION) {
-            String selectedTeam1 = (String) teamSelection1.getSelectedItem();
-            String selectedTeam2 = (String) teamSelection2.getSelectedItem();
+        teamFrame.add(panel, BorderLayout.CENTER);
 
-            if (selectedTeam1.equals(selectedTeam2)) {
-                JOptionPane.showMessageDialog(this, "No se puede seleccionar el mismo equipo. Elige equipos diferentes.", "Error", JOptionPane.ERROR_MESSAGE);
-                showTeamSelection(); // Reintentar selección
+        JButton continueButton = createButton("CONTINUAR");
+        continueButton.addActionListener(e -> {
+            team1 = (String) teamSelection1.getSelectedItem();
+            team2 = (String) teamSelection2.getSelectedItem();
+
+            if (team1.equals(team2)) {
+                JOptionPane.showMessageDialog(this, "Selecciona equipos diferentes.", "Error", JOptionPane.ERROR_MESSAGE);
             } else {
-                showFormationSelection(selectedTeam1, selectedTeam2); // Paso 2: Seleccionar formación para cada jugador
+                teamFrame.dispose();
+                startGame();
             }
-        }
+        });
+        teamFrame.add(continueButton, BorderLayout.SOUTH);
+
+        teamFrame.setVisible(true);
     }
 
-    private void showFormationSelection(String team1, String team2) {
-        String[] formations = {"1-3-2", "1-2-3", "1-4-1", "1-2-1-2"};
-        JComboBox<String> formationSelection1 = new JComboBox<>(formations);
-        JComboBox<String> formationSelection2 = new JComboBox<>(formations);
-
-        JPanel panel = new JPanel(new GridLayout(2, 2));
-        panel.add(new JLabel("Formación para " + team1 + ":  "));
-        panel.add(formationSelection1);
-        panel.add(new JLabel("Formación para " + team2 + ":  "));
-        panel.add(formationSelection2);
-
-        int result = JOptionPane.showConfirmDialog(this, panel, "Seleccionar Formación", JOptionPane.OK_CANCEL_OPTION);
-        if (result == JOptionPane.OK_OPTION) {
-            showFinalContinueOption(); // Paso 3: Botón de continuar para empezar el juego
-        }
-    }
-
-    private void showFinalContinueOption() {
-        int result = JOptionPane.showConfirmDialog(this, "¿Listo para comenzar?", "Continuar", JOptionPane.OK_CANCEL_OPTION);
-        if (result == JOptionPane.OK_OPTION) {
-            startGame(); // Iniciar el juego
-        }
+    private JLabel createStyledLabel(String text) {
+        JLabel label = new JLabel(text);
+        label.setFont(new Font("Arial", Font.BOLD, 16));
+        label.setForeground(Color.WHITE);
+        return label;
     }
 
     private void startGame() {
         JFrame gameFrame = new JFrame("Soccer Stars");
-        
-        // Pasar la resolución actual al GamePanel
-        GamePanel gamePanel = new GamePanel(currentResolution.width, currentResolution.height);
-
         gameFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        // Pasar equipos seleccionados al GamePanel
+        GamePanel gamePanel = new GamePanel(currentResolution.width, currentResolution.height, team1, team2);
         gameFrame.add(gamePanel);
-        
+
         gameFrame.pack();
         gameFrame.setLocationRelativeTo(null);
         gameFrame.setVisible(true);
@@ -190,6 +196,8 @@ public class Menu extends JPanel implements ActionListener {
         gamePanel.startGame();
 
         JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
-        topFrame.dispose(); // Cerrar el menú
+        if (topFrame != null) {
+            topFrame.dispose(); // Cerrar el menú
+        }
     }
 }

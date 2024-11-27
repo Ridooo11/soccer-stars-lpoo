@@ -91,7 +91,7 @@ public class Goal {
     
     public void checkCollisionWithPost(Ball ball) {
         // Factor de rebote (ajustable)
-        double reboundFactor = 0.7; // Ajusta según la experiencia deseada
+        double reboundFactor = 1.1; // Ajusta según la experiencia deseada
 
         // Verificar colisiones con los postes y el travesaño
         boolean leftPostCollision = leftPost.intersects(
@@ -133,7 +133,7 @@ public class Goal {
     
     public void checkCollisionWithPost(Player player) {
         // Factor de rebote (ajustable)
-        double reboundFactor = 0.5;
+        double reboundFactor = 1.2;
 
         // Verificar colisiones con los postes y el travesaño
         boolean leftPostCollision = leftPost.intersects(
