@@ -33,7 +33,12 @@ public class GamePanel extends JPanel implements ActionListener, MouseListener, 
     private Point dragCurrent;
     private final int MAX_DRAG_LENGTH = 100;
     private boolean isSpinEnabled = false; // Variable para controlar si el efecto está activado
-    private double spinAngle = 0.0;        
+    private double spinAngle = 0.0;   
+    
+    private boolean isGoalPause = false;
+    private String goalMessage = "";     // Mensaje del gol a mostrar
+    private int countdown = 0;           // Tiempo restante para el reinicio
+
     
     private Player player1;
     private Player player2;
@@ -309,16 +314,52 @@ public class GamePanel extends JPanel implements ActionListener, MouseListener, 
     
     
     private void checkGoals() {
+        if (isGoalPause) return; // No verificar si estamos en pausa por gol
+
         if (leftGoal.checkGoal(ball)) {
+            isGoalPause = true; // Activar pausa
             player2Score++;
-            resetPositions();
-            isRedTeamTurn = true;
+            handleGoalEvent("¡Gol de " + team2 + "!", false);
         } else if (rightGoal.checkGoal(ball)) {
+            isGoalPause = true; // Activar pausa
             player1Score++;
-            resetPositions();
-            isRedTeamTurn = false;
+            handleGoalEvent("¡Gol de " + team1 + "!", true);
         }
     }
+
+
+    // Manejar el evento del gol
+    private void handleGoalEvent(String goalMessage, boolean redTeamTurnAfterGoal) {
+        isGoalPause = true; // Activar pausa
+        this.goalMessage = goalMessage; // Establecer el mensaje del gol
+        this.countdown = 3; // Reiniciar el contador
+
+        gameTimer.stop();
+        turnTimer.stop();
+
+        // Temporizador para el efecto de gol y el contador
+        Timer countdownTimer = new Timer(1000, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (countdown > 0) {
+                    countdown--; // Decrementar el contador
+                    repaint();   // Actualizar la pantalla
+                } else {
+                    ((Timer) e.getSource()).stop(); // Detener el temporizador
+
+                    // Reanudar el juego
+                    isGoalPause = false;
+                    resetPositions();
+                    isRedTeamTurn = redTeamTurnAfterGoal;
+                    gameTimer.start();
+                    startTurnTimer();
+                    repaint();
+                }
+            }
+        });
+        countdownTimer.start();
+    }
+
     
     // Modificar el método resetPositions
     private void resetPositions() {
@@ -354,8 +395,26 @@ public class GamePanel extends JPanel implements ActionListener, MouseListener, 
             	g.drawImage(backgroundImage, 0, yPosition - 100, panelWidth, FIELD_HEIGHT, this);
             }
         }
+        
+        
 
         drawHeader(g);
+        
+        if (isGoalPause) {
+            g.setFont(new Font("Arial", Font.BOLD, 30));
+            FontMetrics fm = g.getFontMetrics();
+            int textWidth = fm.stringWidth(goalMessage);
+            int textHeight = fm.getHeight();
+
+            // Dibujar el mensaje del gol
+            g.setColor(Color.BLACK);
+            g.drawString(goalMessage, (getWidth() - textWidth) / 2, (getHeight() / 2) - textHeight);
+
+            // Dibujar el contador
+            String countdownText = "Reanudando en: " + countdown;
+            int countdownWidth = fm.stringWidth(countdownText);
+            g.drawString(countdownText, (getWidth() - countdownWidth) / 2, (getHeight() / 2) + textHeight);
+        }
         
         if (!dragging) {
             drawActiveTeamHighlight(g);
@@ -399,9 +458,6 @@ public class GamePanel extends JPanel implements ActionListener, MouseListener, 
                 dx = (dx / magnitude) * MAX_DRAG_LENGTH;
                 dy = (dy / magnitude) * MAX_DRAG_LENGTH;
             }
-            
-           
-                
             
             
             // Calcular el punto final
