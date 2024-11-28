@@ -106,14 +106,21 @@ public class Menu extends JPanel {
         }
     }
     
-    // Método para ajustar la transparencia de los componentes sobre el fondo
     private void makeComponentsTranslucent() {
-        // Hacer los botones semi-transparentes
-        playButton.setOpaque(false);
-        volumeButton.setOpaque(false);
-        resolutionButton.setOpaque(false);
-        
-        // Ajustar color de texto para que contraste con el fondo
+        // Definir un color de fondo semi-transparente con menos opacidad (transparente)
+        Color semiTransparentBackground = new Color(255, 255, 255, 200); // blanco con opacidad de 200 (más visible)
+
+        // Hacer los botones semi-transparentes con un color de fondo esmerilado
+        playButton.setOpaque(true); // Asegurarse de que el botón sea opaco
+        volumeButton.setOpaque(true);
+        resolutionButton.setOpaque(true);
+
+        // Establecer el color de fondo con opacidad
+        playButton.setBackground(semiTransparentBackground);
+        volumeButton.setBackground(semiTransparentBackground);
+        resolutionButton.setBackground(semiTransparentBackground);
+
+        // Ajustar el color de texto para que contraste con el fondo
         playButton.setForeground(Color.WHITE);
         volumeButton.setForeground(Color.WHITE);
         resolutionButton.setForeground(Color.WHITE);
@@ -121,7 +128,7 @@ public class Menu extends JPanel {
     private JButton createButton(String text) {
         JButton button = new JButton(text);
         button.setFont(new Font("Briquette", Font.BOLD, 24));
-        button.setForeground(Color.BLACK);
+        button.setForeground(new Color(252, 252, 247));
         button.setBackground(new Color(0, 102, 0)); // Verde oscuro para botones
         button.setFocusPainted(false);
         button.setBorder(BorderFactory.createLineBorder(Color.WHITE, 3));
